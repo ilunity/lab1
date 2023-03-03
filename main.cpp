@@ -1,21 +1,8 @@
-#include <unistd.h>
 #include <iostream>
 #include <mpi.h>
 #include <ctime>
 
 const int TAG = 8;
-
-void send_int(int message, int dest) {
-    MPI_Send(&message, 1, MPI_INT, dest, TAG, MPI_COMM_WORLD);
-}
-
-int receive_int(int src) {
-    int message;
-    MPI_Status status;
-
-    MPI_Recv(&message, 1, MPI_INT, src, TAG, MPI_COMM_WORLD, &status);
-    return message;
-}
 
 int get_rand(int min, int max) {
     srand(time(0) + rand());
@@ -23,56 +10,6 @@ int get_rand(int min, int max) {
     int num = min + rand() % (max - min + 1);
 
     return num;
-}
-
-//void barrier_print(int rank, const char *str) {
-//    const int barrier = MPI_Barrier(MPI_COMM_WORLD);
-//    if (barrier && rank == 0) {
-//        printf("------------%s------------", str);
-//    }
-//}
-
-void send_messages(int size) {
-    for (int i = 1; i < size; ++i) {
-        const int message = i * 2;
-        send_int(message, i);
-    }
-}
-
-void receive_message(int rank) {
-    const int message = receive_int(0);
-
-    printf("Rank - %d, received message - %d \n", rank, message);
-}
-
-inline void first_program(int rank, int size) {
-//    barrier_print(rank, "First Program");
-
-    if (rank == 0) {
-        send_messages(size);
-    } else {
-        receive_message(rank);
-    }
-}
-
-inline void second_program(int rank, int size) {
-    if (rank == 0) {
-        const int init_number = get_rand(0, 9);
-        send_int(init_number, 1);
-
-        const int result_message = receive_int(size - 1);
-        printf("Init number - %d \nResult - %d", init_number, result_message);
-    } else {
-        const int received_number = receive_int(rank - 1);
-        printf("Rank - %d, received number - %d \n", rank, received_number);
-
-        const bool isLastProcess = rank == size - 1;
-        if (isLastProcess) {
-            send_int(received_number + rank, 0);
-        } else {
-            send_int(received_number + rank, rank + 1);
-        }
-    }
 }
 
 void randomize_matrix(int *matrix, int size) {
@@ -92,8 +29,8 @@ int mult_arrays(const int *arr1, const int *arr2, int size) {
 }
 
 void third_program(int rank, int size) {
-    const int MATRIX_ROW_NUMBER = 50;
-    const int MATRIX_COLUMN_NUMBER = 50;
+    const int MATRIX_ROW_NUMBER = 5;
+    const int MATRIX_COLUMN_NUMBER = 5;
 
     const int matrix_size = MATRIX_ROW_NUMBER * MATRIX_COLUMN_NUMBER;
     int *matrix = new int[matrix_size],
